@@ -4,8 +4,10 @@
 Claude Code: suma el campo `usage` de cada mensaje del asistente en
 ~/.claude/projects/**/*.jsonl (deduplicado por id de mensaje).
 Antigravity (agy): ~/.gemini/antigravity-cli/conversations/*.db (sqlite). Esas
-bases no guardan un contador de tokens en claro; se reporta actividad
-(conversaciones y pasos) y tokens solo si `gen_metadata` trae filas legibles.
+bases no guardan contadores de tokens legibles; se reporta actividad
+(conversaciones y pasos, agrupados por última modificación de la conversación).
+Codex: diferencias entre contadores acumulados en ~/.codex/sessions/**/*.jsonl
+y ~/.codex/archived_sessions/**/*.jsonl; se muestra el último límite registrado.
 """
 import glob, json, os, sqlite3, sys
 from collections import defaultdict
@@ -35,18 +37,13 @@ def add(acc, u):
 
 def claude():
     days = defaultdict(empty)
-    hours = defaultdict(empty)      # solo hoy
-    models = defaultdict(empty)
-    projects = defaultdict(empty)
-    window = empty()                # últimas 5 h (ventana de límite de uso)
+    window = empty()                # actividad durante las últimas 5 h
     seen = set()
     t5 = now - timedelta(hours=5)
     for f in glob.glob(HOME + "/.claude/projects/*/**/*.jsonl", recursive=True):
         try:
             if datetime.fromtimestamp(os.path.getmtime(f)) < since:
                 continue
-            proj = f.split("/.claude/projects/")[1].split("/")[0]
-            proj = proj.replace("-home-janz-", "~/").replace("-", "/") if proj.startswith("-home-janz-") else proj
             with open(f, errors="replace") as fh:
                 for line in fh:
                     if '"usage"' not in line:
@@ -68,10 +65,6 @@ def claude():
                     if dt < since:
                         continue
                     add(days[day_key(dt)], u)
-                    add(models[m.get("model") or "?"], u)
-                    add(projects[proj], u)
-                    if dt.date() == now.date():
-                        add(hours[dt.hour], u)
                     if dt >= t5:
                         add(window, u)
         except OSError:
@@ -82,10 +75,56 @@ def claude():
         series.append(dict(day=k, **days.get(k, empty())))
     return {
         "days": series,
-        "hours": [dict(hour=h, **hours.get(h, empty())) for h in range(24)],
-        "models": sorted(({"name": k, **v} for k, v in models.items()), key=lambda x: -(x["in"] + x["out"] + x["cr"] + x["cw"])),
-        "projects": sorted(({"name": k, **v} for k, v in projects.items()), key=lambda x: -(x["in"] + x["out"] + x["cr"] + x["cw"]))[:6],
         "window5h": window,
+    }
+
+
+def codex():
+    days = defaultdict(empty)
+    limits, limits_ts = None, None
+    files = glob.glob(HOME + "/.codex/sessions/**/*.jsonl", recursive=True)
+    files += glob.glob(HOME + "/.codex/archived_sessions/**/*.jsonl", recursive=True)
+    for f in files:
+        previous = {"input_tokens": 0, "cached_input_tokens": 0, "output_tokens": 0}
+        try:
+            if datetime.fromtimestamp(os.path.getmtime(f)) < since:
+                continue
+            with open(f, errors="replace") as fh:
+                for line in fh:
+                    if '"token_count"' not in line:
+                        continue
+                    try:
+                        o = json.loads(line)
+                        p = o.get("payload") or {}
+                        if p.get("type") != "token_count":
+                            continue
+                        dt = datetime.fromisoformat(o["timestamp"].replace("Z", "+00:00")).astimezone().replace(tzinfo=None)
+                        rate = p.get("rate_limits")
+                        if rate and (limits_ts is None or dt > limits_ts):
+                            limits, limits_ts = rate, dt
+                        usage = (p.get("info") or {}).get("total_token_usage")
+                        if not usage:
+                            continue
+                        current = {k: max(0, int(usage.get(k, 0) or 0)) for k in previous}
+                        # Un contador reiniciado inicia una nueva secuencia.
+                        if any(current[k] < previous[k] for k in current):
+                            previous = {k: 0 for k in previous}
+                        delta = {k: current[k] - previous[k] for k in current}
+                        previous = current
+                        if dt < since or not any(delta.values()):
+                            continue
+                        u = {"input_tokens": max(0, delta["input_tokens"] - delta["cached_input_tokens"]),
+                             "cache_read_input_tokens": delta["cached_input_tokens"],
+                             "output_tokens": delta["output_tokens"]}
+                        add(days[day_key(dt)], u)
+                    except (ValueError, TypeError, KeyError, OverflowError):
+                        continue
+        except OSError:
+            continue
+    return {
+        "days": [dict(day=day_key(since + timedelta(days=i)), **days.get(day_key(since + timedelta(days=i)), empty())) for i in range(DAYS)],
+        "limits": limits,
+        "limitsUpdated": limits_ts.isoformat(timespec="seconds") if limits_ts else None,
     }
 
 
@@ -125,4 +164,4 @@ def agy():
     return {"days": series, "conversations": convs, "tokensAvailable": total_tokens > 0, "loggedIn": logged}
 
 
-json.dump({"updated": now.isoformat(timespec="seconds"), "claude": claude(), "agy": agy()}, sys.stdout)
+json.dump({"updated": now.isoformat(timespec="seconds"), "claude": claude(), "agy": agy(), "codex": codex()}, sys.stdout)
