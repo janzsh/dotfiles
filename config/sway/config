@@ -1,0 +1,156 @@
+# NOTA: solo hay dos modos: tabbed (por defecto) y pseudo-bsp (splits
+# automáticos, scripts/autotile.sh). mod+ctrl+Tab alterna entre ambos.
+
+set $mod Mod4
+set $term kitty
+
+# Fuente mínima: define la altura de las pestañas tabbed. Sin texto en ellas
+# (title_format vacío), así que la barra queda como una franja delgada.
+font pango:JetBrainsMono Nerd Font 4
+titlebar_padding 4 1
+titlebar_border_thickness 0
+
+# Teclado latinoamericano (la-latin1 en consola = latam en xkb).
+input type:keyboard {
+    xkb_layout latam
+}
+
+input type:touchpad {
+    tap enable
+    natural_scroll enable   # deslizar hacia abajo "jala" el contenido
+    dwt enable              # ignora el touchpad mientras escribes
+}
+
+# Ventanas sin barra de título (solo borde fino). En layouts stacking/tabbed
+# sway sigue mostrando las pestañas, es inherente a esos layouts.
+default_border pixel 2
+# Layout por defecto de cada workspace: pestañas. toggle-layout.sh pasa a
+# splits automáticos tipo bsp (autotile.sh) y de vuelta a tabbed.
+workspace_layout tabbed
+for_window [title=".*"] title_format " "
+default_floating_border pixel 2
+# Una sola ventana tileada (a tamaño completo): sin borde, ni el superior.
+smart_borders on
+
+# Espacio entre ventanas (4px) y margen externo al borde de pantalla (5px).
+# En sway el outer se suma al inner, por eso outer = 5 - inner.
+gaps inner 4
+gaps outer 1
+
+floating_modifier $mod normal
+
+bindsym $mod+Return exec $term
+# --no-repeat: sin esto, mantener la tecla repite el bind y el toggle lo cierra.
+bindsym --no-repeat $mod+m exec qs ipc call launcher toggle
+bindsym $mod+q kill
+# Bloquear sin cerrar la sesión: los procesos siguen corriendo detrás.
+bindsym --no-repeat $mod+shift+l exec qs ipc call lock lock
+bindsym --no-repeat $mod+shift+s exec ~/.config/sway/scripts/screenshot-region.sh
+bindsym --no-repeat $mod+shift+p exec qs ipc call power toggle
+# Volumen y brillo (con OSD de Quickshell)
+bindsym --locked XF86AudioRaiseVolume exec ~/.config/sway/scripts/osd.sh volume up
+bindsym --locked XF86AudioLowerVolume exec ~/.config/sway/scripts/osd.sh volume down
+bindsym --locked XF86AudioMute exec ~/.config/sway/scripts/osd.sh volume mute
+bindsym --locked XF86AudioMicMute exec ~/.config/sway/scripts/osd.sh mic-mute
+bindsym --locked XF86MonBrightnessUp exec ~/.config/sway/scripts/osd.sh brightness up
+bindsym --locked XF86MonBrightnessDown exec ~/.config/sway/scripts/osd.sh brightness down
+
+# Selector de ventanas del workspace (Quickshell, Switcher.qml)
+bindsym --no-repeat $mod+Tab exec qs ipc call switcher toggle
+bindsym $mod+shift+c reload
+bindsym $mod+shift+e exec swaynag -t warning -m 'Salir de sway?' -B 'Sí' 'swaymsg exit'
+
+# mod+ctrl+Tab: alterna TODO el workspace entre tabbed y bsp.
+bindsym --no-repeat $mod+ctrl+Tab exec ~/.config/sway/scripts/toggle-layout.sh
+bindsym $mod+f fullscreen
+
+# Foco con h/j/k/l (estilo vim) o flechas; mod+space salta al siguiente
+# hermano del contenedor (recorre el stack/pestañas).
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+bindsym $mod+space focus next sibling
+
+# Redimensionar directo (sin modo), moviendo el divisor hacia la dirección:
+# mod+ctrl+h/j/k/l (ver scripts/resize.sh)
+bindsym $mod+ctrl+h exec ~/.config/sway/scripts/resize.sh h
+bindsym $mod+ctrl+j exec ~/.config/sway/scripts/resize.sh j
+bindsym $mod+ctrl+k exec ~/.config/sway/scripts/resize.sh k
+bindsym $mod+ctrl+l exec ~/.config/sway/scripts/resize.sh l
+
+bindsym $mod+Left focus left
+bindsym $mod+Down focus down
+bindsym $mod+Up focus up
+bindsym $mod+Right focus right
+
+bindsym $mod+shift+h move left
+bindsym $mod+shift+j move down
+bindsym $mod+shift+k move up
+bindsym $mod+shift+Left move left
+bindsym $mod+shift+Down move down
+bindsym $mod+shift+Up move up
+bindsym $mod+shift+Right move right
+
+# Touchpad: 3 dedos a izquierda/derecha = siguiente/anterior workspace con
+# contenido (sway salta los vacíos; el enfocado cuenta aunque esté vacío).
+bindgesture swipe:3:left workspace next_on_output
+bindgesture swipe:3:right workspace prev_on_output
+
+bindsym $mod+1 workspace number 1
+bindsym $mod+2 workspace number 2
+bindsym $mod+3 workspace number 3
+bindsym $mod+4 workspace number 4
+bindsym $mod+5 workspace number 5
+bindsym $mod+6 workspace number 6
+bindsym $mod+7 workspace number 7
+bindsym $mod+8 workspace number 8
+bindsym $mod+9 workspace number 9
+bindsym $mod+0 workspace number 10
+bindsym $mod+shift+1 move container to workspace number 1
+bindsym $mod+shift+2 move container to workspace number 2
+bindsym $mod+shift+3 move container to workspace number 3
+bindsym $mod+shift+4 move container to workspace number 4
+bindsym $mod+shift+5 move container to workspace number 5
+bindsym $mod+shift+6 move container to workspace number 6
+bindsym $mod+shift+7 move container to workspace number 7
+bindsym $mod+shift+8 move container to workspace number 8
+bindsym $mod+shift+9 move container to workspace number 9
+bindsym $mod+shift+0 move container to workspace number 10
+
+# ── Efectos (swayfx) ──────────────────────────────────
+corner_radius 10
+shadows enable
+shadow_blur_radius 18
+shadow_color #00000080
+blur enable
+blur_radius 6
+blur_passes 3
+# Barra y lanzador: blur solo donde hay píxeles opacos (islas, tarjeta).
+layer_effects "qs-bar" "blur enable; blur_ignore_transparent enable; corner_radius 12"
+layer_effects "qs-dock" "blur enable; blur_ignore_transparent enable; corner_radius 18"
+layer_effects "qs-switcher" "blur enable; blur_ignore_transparent enable; corner_radius 16"
+layer_effects "quickshell-power" "blur enable; blur_ignore_transparent enable; corner_radius 16"
+layer_effects "quickshell-launcher" "blur enable; blur_ignore_transparent enable; corner_radius 16"
+
+# Tema: fondo de pantalla y colores de borde (generado por `theme`, ver
+# config/theme). mod+shift+t rota al siguiente tema.
+include ~/.cache/theme/sway.conf
+bindsym --no-repeat $mod+shift+t exec ~/.config/theme/bin/theme next
+
+# Sin barra propia: el shell lo da Quickshell (layer-shell).
+bar {
+    mode invisible
+}
+
+# Entorno + sesión systemd: requisito de los portales (OBS/ScreenCast).
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway SWAYSOCK DISPLAY
+exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK
+exec systemctl --user start sway-session.target
+exec systemctl --user start pipewire pipewire-pulse wireplumber
+exec quickshell
+exec ~/.config/sway/scripts/wm-state-bridge.sh
+exec ~/.config/sway/scripts/autotile.sh
+# Historial del portapapeles (texto e imágenes) para qs ipc call clipboard
+exec wl-paste --type text --watch cliphist store
+exec wl-paste --type image --watch cliphist store
