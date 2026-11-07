@@ -13,6 +13,7 @@ return {
       telescope = { enabled = true },
       blink_cmp = true,
       which_key = true,
+      neotree = true,
     },
   },
   config = function(_, opts)
