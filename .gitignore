@@ -1,0 +1,3 @@
+# Sonidos personales del pomodoro (archivos de audio, no se versionan)
+config/quickshell/sounds/*
+!config/quickshell/sounds/.gitkeep
