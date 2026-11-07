@@ -12,6 +12,7 @@ return {
       treesitter = true,
       telescope = { enabled = true },
       blink_cmp = true,
+      which_key = true,
     },
   },
   config = function(_, opts)
