@@ -15,6 +15,8 @@ return {
       which_key = true,
       neotree = true,
       noice = true,
+      gitsigns = true,
+      lsp_trouble = true,
       notify = true,
       indent_blankline = { enabled = true, scope_color = "lavender" },
     },
