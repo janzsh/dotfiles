@@ -9,6 +9,7 @@
     ./vscodium.nix
     ./antigravity-cli.nix
     ./opencode.nix
+    ./codex.nix
     ./ollama.nix
     ./obsidian.nix
     ./libreoffice.nix
