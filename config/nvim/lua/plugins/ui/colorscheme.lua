@@ -14,6 +14,9 @@ return {
       blink_cmp = true,
       which_key = true,
       neotree = true,
+      noice = true,
+      notify = true,
+      indent_blankline = { enabled = true, scope_color = "lavender" },
     },
   },
   config = function(_, opts)
