@@ -1,0 +1,39 @@
+# Generado por `theme` ({{label}}). Base: config/theme/templates/starship.toml
+palette = "theme"
+add_newline = true
+format = "$directory$git_branch$git_status$nix_shell$cmd_duration$line_break$character"
+
+[directory]
+style = "bold mauve"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[git_branch]
+symbol = " "
+style = "pink"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "red"
+format = "[$all_status$ahead_behind]($style) "
+
+[nix_shell]
+symbol = " "
+style = "sky"
+format = "[$symbol$state]($style) "
+
+[cmd_duration]
+min_time = 2000
+style = "yellow"
+format = "[󰔛 $duration]($style) "
+
+[character]
+success_symbol = "[❯](bold mauve)"
+error_symbol = "[❯](bold red)"
+
+[palettes.theme]
+mauve = "{{mauve}}"
+pink = "{{pink}}"
+red = "{{red}}"
+yellow = "{{yellow}}"
+sky = "{{sky}}"

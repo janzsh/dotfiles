@@ -1,0 +1,98 @@
+#!/usr/bin/env bash
+# theme — gestor de temas en caliente.
+#
+#   theme list          lista los temas (marca el actual)
+#   theme current       imprime el tema actual
+#   theme set <nombre>  activa un tema y lo aplica a todo
+#   theme next | prev   rota entre temas (orden alfabético)
+#   theme apply         vuelve a renderizar el tema actual
+#
+# Fuente de verdad: config/theme/themes/<nombre>/theme.json (+ wallpaper).
+# Salida renderizada en ~/.cache/theme/:
+#   theme.json     -> Quickshell (Theme.qml lo vigila y se recolorea solo)
+#   sway.conf      -> sway (include + aplicado en vivo con swaymsg)
+#   hyprland.lua   -> Hyprland (lo lee modules/theme.lua; `hyprctl reload` lo aplica en vivo)
+#   kitty.conf     -> kitty (include + SIGUSR1 recarga las terminales abiertas)
+#   starship.toml  -> starship (STARSHIP_CONFIG, se relee en cada prompt)
+#   fzf.zsh        -> zsh (se re-source en cada prompt, ver zsh.nix)
+#
+# Para añadir un tema: copia una carpeta de themes/ y edita sus colores.
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+THEMES="$ROOT/themes"
+TEMPLATES="$ROOT/templates"
+OUT="${XDG_CACHE_HOME:-$HOME/.cache}/theme"
+DEFAULT_THEME="evernight"
+
+mkdir -p "$OUT"
+
+themes() { find "$THEMES" -mindepth 2 -maxdepth 2 -name theme.json -printf '%h\n' | xargs -n1 basename | sort; }
+
+current() {
+    local c
+    c="$(cat "$OUT/current" 2>/dev/null || true)"
+    [[ -n "$c" && -f "$THEMES/$c/theme.json" ]] && echo "$c" || echo "$DEFAULT_THEME"
+}
+
+# Sustituye {{clave}} por el valor en una plantilla. Claves: los colores del
+# tema + label + bg (comando de `output * bg` de sway).
+render() {
+    local name="$1" tpl="$2"
+    jq -r --rawfile t "$tpl" --arg dir "$THEMES/$name" '
+        (.colors
+         + {label: .label,
+            bg: (if (.wallpaper // "") != ""
+                 then "\($dir)/\(.wallpaper) fill"
+                 else "\(.colors.base) solid_color" end)}) as $v
+        | reduce ($v | to_entries[]) as $e ($t; gsub("\\{\\{" + $e.key + "\\}\\}"; $e.value))
+    ' "$THEMES/$name/theme.json"
+}
+
+apply() {
+    local name="$1"
+    [[ -f "$THEMES/$name/theme.json" ]] || { echo "tema desconocido: $name" >&2; exit 1; }
+
+    # Escritura atómica: los vigilantes (Quickshell) nunca ven un archivo a medias.
+    local f
+    for f in sway.conf hyprland.lua kitty.conf fzf.zsh starship.toml; do
+        render "$name" "$TEMPLATES/$f" > "$OUT/$f.tmp" && mv "$OUT/$f.tmp" "$OUT/$f"
+    done
+    jq --arg name "$name" '{name: $name, label, colors}' "$THEMES/$name/theme.json" > "$OUT/theme.json.tmp"
+    mv "$OUT/theme.json.tmp" "$OUT/theme.json"
+    echo "$name" > "$OUT/current"
+    # Copia para el greeter de greetd (nix/modules/desktop/greetd.nix): es
+    # best-effort, si el directorio no existe (otra máquina) no pasa nada.
+    local g=/var/cache/greeter/.cache/theme
+    [[ -w "$g" ]] && cp "$OUT/theme.json" "$g/theme.json.tmp" && mv "$g/theme.json.tmp" "$g/theme.json"
+
+    # Aplicar en vivo (todo best-effort: falta de sesión gráfica no es un error).
+    if [[ -n "${SWAYSOCK:-}" ]] || swaymsg -t get_version >/dev/null 2>&1; then
+        grep -vE '^\s*(#|$)' "$OUT/sway.conf" | while IFS= read -r line; do
+            swaymsg -q -- "$line" || true
+        done
+    fi
+    if [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+        hyprctl reload >/dev/null 2>&1 || true
+    fi
+    pkill -USR1 -x kitty 2>/dev/null || true
+}
+
+cycle() {
+    local dir="$1" cur list n i
+    cur="$(current)"
+    mapfile -t list < <(themes)
+    n=${#list[@]}
+    for i in "${!list[@]}"; do [[ "${list[$i]}" == "$cur" ]] && break; done
+    apply "${list[$(( (i + dir + n) % n ))]}"
+}
+
+case "${1:-}" in
+    list)    cur="$(current)"; for t in $(themes); do [[ "$t" == "$cur" ]] && echo "* $t" || echo "  $t"; done ;;
+    current) current ;;
+    set)     [[ -n "${2:-}" ]] || { echo "uso: theme set <nombre>" >&2; exit 1; }; apply "$2" ;;
+    next)    cycle 1 ;;
+    prev)    cycle -1 ;;
+    apply)   apply "$(current)" ;;
+    *)       sed -n '2,12p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 1 ;;
+esac

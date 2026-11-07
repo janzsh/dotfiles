@@ -1,0 +1,32 @@
+{
+  "label": "Evernight",
+  "wallpaper": "wallpaper.jpg",
+  "colors": {
+    "rosewater": "#f5d5e0",
+    "flamingo": "#f2b5cf",
+    "pink": "#f09ac8",
+    "mauve": "#c58af0",
+    "mauvePastel": "#e3d0f7",
+    "red": "#e63950",
+    "peach": "#f2a07b",
+    "yellow": "#efc46a",
+    "green": "#8fd9a8",
+    "ok": "#8fe3f0",
+    "teal": "#7fd6d0",
+    "sky": "#8ec8f5",
+    "blue": "#8aa4f5",
+    "lavender": "#b9b3f7",
+    "text": "#e9e4f7",
+    "subtext1": "#d0cbe6",
+    "subtext0": "#b3aed0",
+    "overlay2": "#9a95bb",
+    "overlay1": "#827ea3",
+    "overlay0": "#6b6889",
+    "surface2": "#4f4c6e",
+    "surface1": "#3a3957",
+    "surface0": "#2a2a45",
+    "base": "#181c33",
+    "mantle": "#121528",
+    "crust": "#0c0e1e"
+  }
+}
