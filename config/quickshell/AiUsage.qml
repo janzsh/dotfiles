@@ -1,8 +1,8 @@
 // Panel centrado de consumo de Claude Code, Codex y Antigravity.
 // ai-usage.py lee sus registros locales y actualiza los datos cada minuto y al abrir.
-// La gráfica compara la semana actual; Antigravity estima 100K tokens por paso.
+// La gráfica muestra la semana actual o la anterior; Antigravity estima 100K tokens por paso.
 // Se abre desde la barra o por IPC: qs ipc call ai toggle | open | close
-// Teclas: R actualiza los datos y Esc cierra el panel.
+// Teclas: R actualiza los datos, ←/→ cambian de semana y Esc cierra el panel.
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -12,6 +12,7 @@ import QtQuick.Layouts
 Scope {
     id: root
     property bool shown: false
+    property int weekOffset: 0      // 0 = semana actual, 1 = semana anterior
     property var data: ({ claude: null, codex: null, agy: null })
     readonly property var cl: data.claude
     readonly property var cx: data.codex
@@ -35,26 +36,35 @@ Scope {
     function limitReset(limit) {
         return limit && limit.resets_at ? "reinicia " + new Date(limit.resets_at * 1000).toLocaleString(Qt.locale(), "dd/MM HH:mm") : "sin reinicio registrado"
     }
-    // El colector incluye hoy y los 13 días anteriores. Se rellenan los días
-    // futuros con cero para mantener siempre el eje de lunes a domingo.
-    function weekValues(days, field) {
+    // El colector incluye hoy y los 13 días anteriores: alcanza para la semana
+    // anterior completa. Los días futuros quedan en cero para mantener el eje
+    // de lunes a domingo.
+    function weekValues(days, field, offset) {
         const result = [0, 0, 0, 0, 0, 0, 0]
         if (!days || !days.length) return result
         const today = new Date(days[days.length - 1].day + "T12:00:00")
-        const todayIndex = (today.getDay() + 6) % 7
-        for (let i = 0; i <= todayIndex; i++) {
-            const entry = days[days.length - 1 - todayIndex + i]
+        const start = days.length - 1 - (today.getDay() + 6) % 7 - 7 * offset
+        for (let i = 0; i < 7; i++) {
+            const entry = start + i >= 0 && start + i < days.length ? days[start + i] : null
             if (entry) result[i] = field === "steps" ? entry.steps * 100000 : total(entry)
         }
         return result
     }
+    function weekRange(offset) {
+        if (!data.updated) return ""
+        const monday = new Date(data.updated)
+        monday.setDate(monday.getDate() - (monday.getDay() + 6) % 7 - 7 * offset)
+        const sunday = new Date(monday)
+        sunday.setDate(monday.getDate() + 6)
+        return monday.toLocaleDateString(Qt.locale(), "dd/MM") + " – " + sunday.toLocaleDateString(Qt.locale(), "dd/MM")
+    }
     readonly property var series: [
-        { name: "Claude Code", color: Theme.peach, values: weekValues(cl && cl.days, "tokens") },
-        { name: "Codex", color: Theme.green, values: weekValues(cx && cx.days, "tokens") },
-        { name: "Antigravity", color: Theme.sky, values: weekValues(ag && ag.days, "steps") }
+        { name: "Claude Code", color: Theme.peach, values: weekValues(cl && cl.days, "tokens", weekOffset) },
+        { name: "Codex", color: Theme.green, values: weekValues(cx && cx.days, "tokens", weekOffset) },
+        { name: "Antigravity", color: Theme.sky, values: weekValues(ag && ag.days, "steps", weekOffset) }
     ]
     readonly property var labels: ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
-    readonly property int todayIndex: data.updated ? (new Date(data.updated).getDay() + 6) % 7 : -1
+    readonly property int todayIndex: data.updated && weekOffset === 0 ? (new Date(data.updated).getDay() + 6) % 7 : -1
     readonly property real chartMax: series.reduce((max, s) => Math.max(max, ...s.values), 1)
 
     IpcHandler {
@@ -74,7 +84,7 @@ Scope {
     }
     function refresh() { if (!collector.running) collector.running = true }
     Timer { interval: 60000; running: true; repeat: true; triggeredOnStart: true; onTriggered: root.refresh() }
-    onShownChanged: if (shown) refresh()
+    onShownChanged: if (shown) { weekOffset = 0; refresh() }
 
     component Label: Text {
         color: Theme.subtext0
@@ -127,6 +137,8 @@ Scope {
             Keys.onPressed: event => {
                 if (event.key === Qt.Key_Escape) root.shown = false
                 else if (event.key === Qt.Key_R) root.refresh()
+                else if (event.key === Qt.Key_Left) root.weekOffset = 1
+                else if (event.key === Qt.Key_Right) root.weekOffset = 0
                 else return
                 event.accepted = true
             }
@@ -188,7 +200,12 @@ Scope {
                                 spacing: 9
                                 RowLayout {
                                     Layout.fillWidth: true
-                                    Text { text: "Actividad diaria · semana actual"; color: Theme.text; font { family: Theme.font; pixelSize: 14; weight: Font.Bold } }
+                                    IconButton { icon: "\u{f0141}"; size: 24; iconSize: 14; enabled: root.weekOffset === 0; opacity: enabled ? 1 : 0.35; onClicked: root.weekOffset = 1 }
+                                    IconButton { icon: "\u{f0142}"; size: 24; iconSize: 14; enabled: root.weekOffset === 1; opacity: enabled ? 1 : 0.35; onClicked: root.weekOffset = 0 }
+                                    Text {
+                                        text: "Actividad diaria · " + (root.weekOffset === 0 ? "semana actual" : "semana anterior") + (root.data.updated ? " (" + root.weekRange(root.weekOffset) + ")" : "")
+                                        color: Theme.text; font { family: Theme.font; pixelSize: 14; weight: Font.Bold }
+                                    }
                                     Item { Layout.fillWidth: true }
                                     Repeater {
                                         model: root.series
