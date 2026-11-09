@@ -25,7 +25,8 @@ hl.on("hyprland.start", function()
 
     wallpaper()
     hl.exec_cmd("quickshell")
-    hl.exec_cmd("~/.config/hypr/scripts/wm-state-bridge.sh")
+    -- wm-state-bridge.sh arranca con hyprland-session.target (servicio de
+    -- usuario en nix/home/janz/hyprland.nix, que lo reinicia si muere).
     -- Historial del portapapeles (texto e imágenes) para qs ipc call clipboard
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
