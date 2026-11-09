@@ -42,8 +42,10 @@ write_state() {
         }' > "$STATE_FILE.tmp" && mv "$STATE_FILE.tmp" "$STATE_FILE"
 }
 
-write_state
+# Un fallo puntual de hyprctl/jq (p. ej. durante un reload) no debe matar el
+# puente: se conserva el estado anterior y se espera al siguiente evento.
+write_state || true
 # Cualquier evento (workspace, ventanas, foco) vuelve a escribir el estado.
 socat -U - "UNIX-CONNECT:$SOCK" | while read -r _; do
-    write_state
+    write_state || true
 done
