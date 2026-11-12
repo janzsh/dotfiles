@@ -18,8 +18,8 @@ hl.on("config.reloaded", wallpaper)
 
 hl.on("hyprland.start", function()
     -- Entorno + sesión systemd: requisito de los portales (OBS/ScreenCast).
-    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=Hyprland HYPRLAND_INSTANCE_SIGNATURE DISPLAY")
-    hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE")
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=Hyprland HYPRLAND_INSTANCE_SIGNATURE XDG_SESSION_ID DISPLAY")
+    hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE XDG_SESSION_ID")
     hl.exec_cmd("systemctl --user start hyprland-session.target")
     hl.exec_cmd("systemctl --user start pipewire pipewire-pulse wireplumber")
 

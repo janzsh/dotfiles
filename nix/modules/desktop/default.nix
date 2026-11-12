@@ -7,5 +7,6 @@
     ./sway.nix
     ./hyprland.nix
     ./flatpak.nix
+    ./polkit.nix
   ];
 }
