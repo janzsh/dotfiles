@@ -18,14 +18,15 @@ hl.on("config.reloaded", wallpaper)
 
 hl.on("hyprland.start", function()
     -- Entorno + sesión systemd: requisito de los portales (OBS/ScreenCast).
-    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=Hyprland HYPRLAND_INSTANCE_SIGNATURE DISPLAY")
-    hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE")
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=Hyprland HYPRLAND_INSTANCE_SIGNATURE XDG_SESSION_ID DISPLAY")
+    hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE XDG_SESSION_ID")
     hl.exec_cmd("systemctl --user start hyprland-session.target")
     hl.exec_cmd("systemctl --user start pipewire pipewire-pulse wireplumber")
 
     wallpaper()
     hl.exec_cmd("quickshell")
-    hl.exec_cmd("~/.config/hypr/scripts/wm-state-bridge.sh")
+    -- wm-state-bridge.sh arranca con hyprland-session.target (servicio de
+    -- usuario en nix/home/janz/hyprland.nix, que lo reinicia si muere).
     -- Historial del portapapeles (texto e imágenes) para qs ipc call clipboard
     hl.exec_cmd("wl-paste --type text --watch cliphist store")
     hl.exec_cmd("wl-paste --type image --watch cliphist store")

@@ -10,5 +10,6 @@
     clion
     rider
     datagrip
+    rust-rover
   ];
 }

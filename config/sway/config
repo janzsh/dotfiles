@@ -144,8 +144,8 @@ bar {
 }
 
 # Entorno + sesión systemd: requisito de los portales (OBS/ScreenCast).
-exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway SWAYSOCK DISPLAY
-exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway SWAYSOCK XDG_SESSION_ID DISPLAY
+exec systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP SWAYSOCK XDG_SESSION_ID
 exec systemctl --user start sway-session.target
 exec systemctl --user start pipewire pipewire-pulse wireplumber
 exec quickshell
