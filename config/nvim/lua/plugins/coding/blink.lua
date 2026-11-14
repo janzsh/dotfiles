@@ -2,6 +2,8 @@ return {
   "saghen/blink.cmp",
   version = "1.*",
   event = { "InsertEnter", "CmdlineEnter" },
+  -- Colorea la etiqueta del menú como el código real (tipos, firmas...).
+  dependencies = { "xzbdmw/colorful-menu.nvim" },
   ---@module 'blink.cmp'
   ---@type blink.cmp.Config
   opts = {
@@ -11,6 +13,17 @@ return {
       list = { selection = { preselect = true, auto_insert = true } },
       accept = { auto_brackets = { enabled = true } },
       documentation = { auto_show = true, auto_show_delay_ms = 300 },
+      menu = {
+        draw = {
+          columns = { { "kind_icon" }, { "label", gap = 1 } },
+          components = {
+            label = {
+              text = function(ctx) return require("colorful-menu").blink_components_text(ctx) end,
+              highlight = function(ctx) return require("colorful-menu").blink_components_highlight(ctx) end,
+            },
+          },
+        },
+      },
       ghost_text = { enabled = true },
     },
     sources = { default = { "lsp", "path", "snippets", "buffer" } },
