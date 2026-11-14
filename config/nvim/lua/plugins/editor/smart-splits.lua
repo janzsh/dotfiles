@@ -13,6 +13,7 @@ return {
     { "<C-j>", function() require("smart-splits").move_cursor_down() end, desc = "Ventana abajo" },
     { "<C-k>", function() require("smart-splits").move_cursor_up() end, desc = "Ventana arriba" },
     { "<C-l>", function() require("smart-splits").move_cursor_right() end, desc = "Ventana derecha" },
+    { "<C-\\>", function() require("smart-splits").move_cursor_previous() end, desc = "Ventana anterior" },
     { "<A-h>", function() require("smart-splits").resize_left() end, desc = "Reducir ancho" },
     { "<A-j>", function() require("smart-splits").resize_down() end, desc = "Aumentar alto" },
     { "<A-k>", function() require("smart-splits").resize_up() end, desc = "Reducir alto" },

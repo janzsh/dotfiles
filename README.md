@@ -64,8 +64,10 @@ Pensado para que romper algo no obligue a abrir un archivo de miles de líneas:
 - Atajos dentro de cada spec (`keys = {}`), así un plugin roto no tumba el
   arranque. `lazy-lock.json` versionado. Catppuccin Frappé.
 
-Lenguajes: Go (gopls + goimports), Python (basedpyright + ruff), TOML (taplo),
-JSON, SQL (sqlfluff). Los atajos aparecen en which-key al pulsar `<leader>`.
+Lenguajes: Go (gopls + goimports + delve), Python (basedpyright + ruff +
+debugpy), Lua (lua_ls + stylua + lazydev), TOML (taplo), JSON, SQL (sqlfluff).
+Cada lenguaje añade también su depurador (nvim-dap) y su adaptador de tests
+(neotest). Los atajos aparecen en which-key al pulsar `<leader>`.
 
 ## Cómo está montado
 

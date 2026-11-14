@@ -10,4 +10,11 @@ return {
     "stevearc/conform.nvim",
     opts = { formatters_by_ft = { go = { "goimports" } } },
   },
+  -- Depurar con delve; también `go test` del cursor (dap-go.debug_test).
+  { "leoluz/nvim-dap-go", ft = "go", dependencies = { "mfussenegger/nvim-dap" }, opts = {} },
+  {
+    "nvim-neotest/neotest",
+    dependencies = { "fredrikaverpil/neotest-golang" },
+    opts = { adapters = { ["neotest-golang"] = {} } },
+  },
 }

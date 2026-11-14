@@ -5,3 +5,9 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   desc = "Resaltar lo copiado",
   callback = function() vim.hl.on_yank() end,
 })
+
+vim.api.nvim_create_user_command("OpenDotfilesConfig", function()
+  local root = vim.fn.expand("~/dotfiles")
+  vim.fn.chdir(root)
+  require("telescope.builtin").find_files({ cwd = root, hidden = true })
+end, { desc = "Abrir los dotfiles (cambia el cwd)" })

@@ -7,4 +7,17 @@ return {
     "stevearc/conform.nvim",
     opts = { formatters_by_ft = { python = { "ruff_organize_imports", "ruff_format" } } },
   },
+  -- debugpy-adapter viene de python3Packages.debugpy (nix); usa el python del
+  -- venv activo para ejecutar el programa.
+  {
+    "mfussenegger/nvim-dap-python",
+    ft = "python",
+    dependencies = { "mfussenegger/nvim-dap" },
+    config = function() require("dap-python").setup("debugpy-adapter") end,
+  },
+  {
+    "nvim-neotest/neotest",
+    dependencies = { "nvim-neotest/neotest-python" },
+    opts = { adapters = { ["neotest-python"] = { dap = { justMyCode = false } } } },
+  },
 }
