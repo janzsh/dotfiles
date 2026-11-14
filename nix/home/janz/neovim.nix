@@ -15,6 +15,8 @@
     extraPackages = with pkgs; [
       # base (lazy, telescope, treesitter)
       git gcc gnumake ripgrep fd tree-sitter
+      # go (goimports viene en gotools)
+      go gopls gotools
       # python (lua/plugins/lang/python.lua)
       basedpyright ruff
       # toml
