@@ -2,6 +2,11 @@
 return {
   "folke/noice.nvim",
   event = "VeryLazy",
+  keys = {
+    { "<leader>nh", "<cmd>Noice history<cr>", desc = "Historial de mensajes" },
+    { "<leader>nl", "<cmd>Noice last<cr>", desc = "Último mensaje" },
+    { "<leader>nd", "<cmd>Noice dismiss<cr>", desc = "Ocultar notificaciones" },
+  },
   dependencies = {
     "MunifTanjim/nui.nvim",
     {

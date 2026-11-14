@@ -4,6 +4,11 @@ local keys = {
   { "<leader>bd", function() require("bufdelete").bufdelete(0, false) end, desc = "Cerrar buffer" },
   { "<leader>bo", "<cmd>BufferLineCloseOthers<cr>", desc = "Cerrar los demás" },
   { "<leader>bp", "<cmd>BufferLineTogglePin<cr>", desc = "Fijar buffer" },
+  { "<leader>bb", "<cmd>BufferLinePick<cr>", desc = "Elegir buffer por letra" },
+  { "<leader>bh", "<cmd>BufferLineMovePrev<cr>", desc = "Mover buffer a la izquierda" },
+  { "<leader>bl", "<cmd>BufferLineMoveNext<cr>", desc = "Mover buffer a la derecha" },
+  { "<leader>bH", "<cmd>BufferLineCloseLeft<cr>", desc = "Cerrar buffers a la izquierda" },
+  { "<leader>bL", "<cmd>BufferLineCloseRight<cr>", desc = "Cerrar buffers a la derecha" },
 }
 -- Alt+1..9 salta al buffer por su posición (el número que muestra la línea).
 for i = 1, 9 do
@@ -30,9 +35,19 @@ return {
         close_command = function(n) require("bufdelete").bufdelete(n, false) end,
         right_mouse_command = function(n) require("bufdelete").bufdelete(n, false) end,
         indicator = { style = "underline" },
-        max_name_length = 16,
+        separator_style = "thin",
+        show_close_icon = false,
+        max_name_length = 24,
+        sort_by = "insert_at_end", -- mantiene estables los números de Alt+1..9
         diagnostics = "nvim_lsp",
-        diagnostics_indicator = function(count) return "(" .. count .. ")" end,
+        diagnostics_indicator = function(_, _, diagnostics)
+          local parts = {}
+          for _, item in ipairs({ { "error", "" }, { "warning", "" } }) do
+            local count = diagnostics[item[1]] or 0
+            if count > 0 then parts[#parts + 1] = item[2] .. " " .. count end
+          end
+          return table.concat(parts, " ")
+        end,
         offsets = {
           { filetype = "neo-tree", text = "Explorador", text_align = "left", separator = false },
         },
