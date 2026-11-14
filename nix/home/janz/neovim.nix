@@ -19,10 +19,10 @@
       imagemagick
       # lua (lua/plugins/lang/lua.lua)
       lua-language-server stylua
-      # go (goimports viene en gotools)
-      go gopls gotools
-      # python (lua/plugins/lang/python.lua)
-      basedpyright ruff
+      # go (goimports viene en gotools; delve para nvim-dap-go)
+      go gopls gotools delve
+      # python (lua/plugins/lang/python.lua; debugpy para nvim-dap-python)
+      basedpyright ruff python3Packages.debugpy
       # toml
       taplo
       # json (jsonls)

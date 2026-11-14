@@ -10,10 +10,12 @@ return {
     spec = {
       { "<leader>b", group = "buffers" },
       { "<leader>c", group = "código" },
+      { "<leader>d", group = "depurar" },
       { "<leader>f", group = "buscar" },
       { "<leader>h", group = "git (hunks)" },
       { "<leader>n", group = "notificaciones" },
       { "<leader>t", group = "alternar" },
+      { "<leader>T", group = "tests" },
       { "<leader>x", group = "diagnósticos" },
     },
   },
