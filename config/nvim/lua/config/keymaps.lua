@@ -2,6 +2,7 @@ local map = vim.keymap.set
 
 map("n", "<Esc>", "<cmd>nohlsearch<cr>", { desc = "Quitar resaltado de búsqueda" })
 map({ "n", "i", "x" }, "<C-s>", "<cmd>write<cr><esc>", { desc = "Guardar" })
+map("n", "<C-S-a>", "<cmd>wall<cr>", { desc = "Guardar todos" })
 map("n", "<leader>w", "<cmd>write<cr>", { desc = "Guardar" })
 map("n", "<leader>q", "<cmd>quit<cr>", { desc = "Salir" })
 

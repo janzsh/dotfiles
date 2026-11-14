@@ -1,6 +1,7 @@
 local keys = {
   { "<S-h>", "<cmd>BufferLineCyclePrev<cr>", desc = "Buffer anterior" },
   { "<S-l>", "<cmd>BufferLineCycleNext<cr>", desc = "Buffer siguiente" },
+  { "<C-q>", function() require("bufdelete").bufdelete(0, false) end, desc = "Cerrar buffer" },
   { "<leader>bd", function() require("bufdelete").bufdelete(0, false) end, desc = "Cerrar buffer" },
   { "<leader>bo", "<cmd>BufferLineCloseOthers<cr>", desc = "Cerrar los demás" },
   { "<leader>bp", "<cmd>BufferLineTogglePin<cr>", desc = "Fijar buffer" },
