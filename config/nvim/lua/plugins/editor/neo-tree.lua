@@ -6,8 +6,37 @@ return {
     "nvim-lua/plenary.nvim",
     "nvim-tree/nvim-web-devicons",
     "MunifTanjim/nui.nvim",
+    -- Al abrir un archivo con varios splits, pregunta en cuál (letra sobre cada ventana).
+    {
+      "s1n7ax/nvim-window-picker",
+      version = "2.*",
+      opts = {
+        filter_rules = {
+          include_current_win = false,
+          autoselect_one = true,
+          bo = {
+            filetype = { "neo-tree", "neo-tree-popup", "notify", "noice" },
+            buftype = { "terminal", "quickfix" },
+          },
+        },
+      },
+    },
+    -- Previsualizar imágenes con `P` (protocolo gráfico de kitty). magick_cli usa
+    -- el binario de imagemagick (nix/home/janz/neovim.nix) en vez de la luarock.
+    {
+      "3rd/image.nvim",
+      opts = {
+        backend = "kitty",
+        processor = "magick_cli",
+        integrations = { markdown = { enabled = false } },
+        max_width = 100,
+        max_height = 12,
+      },
+    },
   },
   keys = {
+    { "<C-m>", "<cmd>Neotree toggle<cr>", desc = "Explorador" },
+    { "<C-S-m>", "<cmd>Neotree focus<cr>", desc = "Enfocar explorador" },
     { "<leader>e", "<cmd>Neotree toggle<cr>", desc = "Explorador" },
     { "<leader>E", "<cmd>Neotree reveal<cr>", desc = "Explorador (archivo actual)" },
   },
@@ -44,7 +73,7 @@ return {
     window = {
       width = 36,
       mappings = {
-        ["P"] = { "toggle_preview", config = { use_float = false } },
+        ["P"] = { "toggle_preview", config = { use_float = false, use_image_nvim = true } },
       },
     },
     filesystem = {

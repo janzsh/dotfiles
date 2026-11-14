@@ -26,6 +26,9 @@ require("lazy").setup({
   -- El lockfile queda en el repo (config/nvim): :Lazy restore si algo se rompe tras un update.
   lockfile = vim.fn.stdpath("config") .. "/lazy-lock.json",
   install = { colorscheme = { "catppuccin-frappe", "habamax" } },
+  -- Sin luarocks: en NixOS no compila, y lo único que lo pedía (image.nvim y su
+  -- rock `magick`) usa el binario de imagemagick (processor = "magick_cli").
+  rocks = { enabled = false },
   checker = { enabled = false },
   change_detection = { notify = false },
 })
