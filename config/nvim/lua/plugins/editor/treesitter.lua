@@ -1,12 +1,13 @@
 -- Rama `main` (reescritura): ya no hay `configs.setup{ highlight = ... }`.
 -- Los parsers se instalan con install() y el resaltado se activa por FileType.
 -- Cada archivo de lua/plugins/lang/ añade sus parsers a `ensure_installed`
--- (lazy concatena las listas de los `opts` repetidos).
+-- (`opts_extend` indica a lazy que concatene esa lista entre specs).
 return {
   "nvim-treesitter/nvim-treesitter",
   branch = "main",
   lazy = false,
   build = ":TSUpdate",
+  opts_extend = { "ensure_installed" },
   opts = { ensure_installed = {} },
   config = function(_, opts)
     local ts = require("nvim-treesitter")
