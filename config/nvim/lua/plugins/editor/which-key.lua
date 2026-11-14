@@ -12,6 +12,7 @@ return {
       { "<leader>c", group = "código" },
       { "<leader>f", group = "buscar" },
       { "<leader>h", group = "git (hunks)" },
+      { "<leader>n", group = "notificaciones" },
       { "<leader>t", group = "alternar" },
       { "<leader>x", group = "diagnósticos" },
     },
