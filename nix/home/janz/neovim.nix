@@ -17,6 +17,8 @@
       git gcc gnumake ripgrep fd tree-sitter
       # image.nvim (previsualizar imágenes en neo-tree)
       imagemagick
+      # lua (lua/plugins/lang/lua.lua)
+      lua-language-server stylua
       # go (goimports viene en gotools)
       go gopls gotools
       # python (lua/plugins/lang/python.lua)
